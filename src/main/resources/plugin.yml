@@ -1,0 +1,11 @@
+name: ScreenPlugin
+version: '${project.version}'
+main: com.github.mangoperson.screenplugin.ScreenPlugin
+api-version: 1.19
+authors: [ MangoPerson ]
+description: Display Screen in Minecraft
+website: https://github.com/mangoperson
+commands:
+  screen:
+    description: Update the screen
+    usage: "Usage: /screen <width> <height>"
