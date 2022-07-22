@@ -59,7 +59,6 @@ public abstract class SCommand implements TabExecutor {
                 return filter(new ArrayList<>(subCommands.keySet()));
             }
             for (Map.Entry<String, SCommand> subCommand : subCommands.entrySet()) {
-                System.out.println("Command in loop: " + subCommand.getValue().name);
                 if (args[0].equalsIgnoreCase(subCommand.getKey())) {
                     SCommand cmd = subCommand.getValue();
                     cmd.args = ArrayUtils.remove(args, 0);
