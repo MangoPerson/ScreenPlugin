@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -30,7 +31,7 @@ public abstract class SCommand implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         this.args = args;
         if (subCommands.size() > 0) {
             if (args.length < 1) return false;
@@ -50,35 +51,23 @@ public abstract class SCommand implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         this.sender = sender;
         this.args = args;
-        String argString = "";
-        for (String s : args) {
-            argString += s + ", ";
-        }
-        String cmdString = "";
-        for(SCommand s : subCommands.values()) {
-            cmdString += s.name + ", ";
-        }
         if (subCommands.size() > 0) {
             if (args.length <= 1) {
-                System.out.println("Command: " + name + "\nArgs: " + argString + "\nSubcommands: " + cmdString);
                 return filter(new ArrayList<>(subCommands.keySet()));
             }
             for (Map.Entry<String, SCommand> subCommand : subCommands.entrySet()) {
                 System.out.println("Command in loop: " + subCommand.getValue().name);
                 if (args[0].equalsIgnoreCase(subCommand.getKey())) {
                     SCommand cmd = subCommand.getValue();
-                    System.out.println("Command: " + name + "\nArgs: " + argString + "\nSubcommands: " + cmdString +  "\nCurrent Subcommand: " + cmd.name);
                     cmd.args = ArrayUtils.remove(args, 0);
                     return filter(cmd.onTabComplete(sender, command, label, cmd.args));
                 }
             }
-            System.out.println("Command: " + name + "\nArgs: " + argString + "\nSubcommands: " + cmdString);
             return new ArrayList<>();
         }
-        System.out.println("Command: " + name + "\nArgs: " + argString + "\nSubcommands: " + cmdString);
         List<String> tabList = tabComplete(args.length - 1);
         if (tabList != null) return filter(tabList);
 
