@@ -32,19 +32,19 @@ public abstract class SCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         this.args = args;
-        if (!checkArgs()) return false;
         if (subCommands.size() > 0) {
+            if (args.length < 1) return false;
             for (Map.Entry<String, SCommand> subCommand : subCommands.entrySet()) {
                 if (args[0].equalsIgnoreCase(subCommand.getKey())) {
                     SCommand cmd = subCommand.getValue();
                     cmd.sender = sender;
                     cmd.args = ArrayUtils.remove(args, 0);
-                    if (cmd.checkArgs()) return cmd.onCommand(sender, command, label, cmd.args);
+                    return cmd.onCommand(sender, command, label, cmd.args);
                 }
             }
             return false;
         }
-
+        if (!checkArgs()) return false;
         this.sender = sender;
         return run();
     }
@@ -72,7 +72,7 @@ public abstract class SCommand implements TabExecutor {
                     SCommand cmd = subCommand.getValue();
                     System.out.println("Command: " + name + "\nArgs: " + argString + "\nSubcommands: " + cmdString +  "\nCurrent Subcommand: " + cmd.name);
                     cmd.args = ArrayUtils.remove(args, 0);
-                    if (cmd.checkArgs()) return filter(cmd.onTabComplete(sender, command, label, cmd.args));
+                    return filter(cmd.onTabComplete(sender, command, label, cmd.args));
                 }
             }
             System.out.println("Command: " + name + "\nArgs: " + argString + "\nSubcommands: " + cmdString);
