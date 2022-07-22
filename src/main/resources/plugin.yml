@@ -9,3 +9,6 @@ commands:
   screen:
     description: Update the screen
     usage: "Usage: /screen <width> <height>"
+  mwtest:
+    description: Test for subcommands
+    usage: "Usage: /mwtest [abc|def]"

@@ -23,11 +23,15 @@ public class ScreenCommand extends SCommand {
     }
 
     @Override
-    protected boolean run() {
+    protected boolean checkArgs() {
         if (args.length != 2) return false;
         if (!NumberUtils.isParsable(args[0])) return false;
         if (!NumberUtils.isParsable(args[1])) return false;
+        return true;
+    }
 
+    @Override
+    protected boolean run() {
         World w;
         if (sender instanceof Player) {
             w = ((Player) sender).getWorld();
@@ -63,10 +67,5 @@ public class ScreenCommand extends SCommand {
             }
         }
         return true;
-    }
-
-    @Override
-    protected List<String> tabComplete(int arg) {
-        return null;
     }
 }
