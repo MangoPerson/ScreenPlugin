@@ -2,8 +2,13 @@ package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.util.SCommand;
 import org.apache.commons.lang3.EnumUtils;
+import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.checkerframework.checker.units.qual.A;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MWCreateCommand extends SCommand {
 
@@ -26,27 +31,30 @@ public class MWCreateCommand extends SCommand {
 
         //make a world creator with the name specified
         WorldCreator wc = new WorldCreator(args[0]);
-        //get type options specified
-        String[] opT = oargs("t");
 
-        //if user has specified type options
-        if (opT.length > 0) {
-            //type is the first argument
-            String t = opT[0];
-            //check if the world type exists
-            if (!EnumUtils.isValidEnum(WorldType.class, t.toUpperCase())) {
-                reply(t + " is not a valid world type");
-                return true;
-            }
-            //convert the type name into a WorldType object
-            WorldType wt = WorldType.valueOf(t.toUpperCase());
-            //set the world creator to use that type of world
-            wc.type(wt);
-        }
+        boolean t = useNSOption("t", "Must use a valid world type (normal, flat, amplified, large_biomes)",
+                str -> WorldType.valueOf(str.toUpperCase()), ops -> wc.type(ops.get(0)));
+        boolean s = useNSOption("s", "Seed must be a number",
+                str -> Long.valueOf(str), ops -> wc.seed(ops.get(0)));
+        if (!t || !s) return true;
 
         //create the world
         wc.createWorld();
-        reply("Created " + wc.type().getName().toLowerCase() + " world \"" + args[0] + "\"");
+        reply("Created " + wc.type().getName().toLowerCase() + " world \"" + wc.name() + "\"" + " with seed " + wc.seed());
         return true;
+    }
+
+    @Override
+    protected List<String> tabComplete(int arg) {
+        if (arg < 1) return new ArrayList<>();
+        if (args[arg-1].equalsIgnoreCase("--t")) {
+            //get list of world names
+            List<String> names = new ArrayList<>();
+            for (WorldType type : WorldType.values()) {
+                names.add(type.name().toLowerCase());
+            }
+            return names;
+        }
+        return new ArrayList<>();
     }
 }

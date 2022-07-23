@@ -7,6 +7,7 @@ public class MWorldCommand extends SCommand {
     public MWorldCommand() {
         super("mworld");
         //add all mworld subcommands
+        addSubCommand("help", new MWHelpCommand());
         addSubCommand("create", new MWCreateCommand());
         addSubCommand("remove", new MWRemoveCommand());
         addSubCommand("teleport", new MWTeleportCommand());

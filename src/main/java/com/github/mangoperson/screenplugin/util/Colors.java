@@ -12,7 +12,6 @@ public class Colors {
 
         //define average RGB for all concrete and terracotta blocks
         colorMap.put(Material.WHITE_CONCRETE, c(208, 214 ,214));
-        colorMap.put(Material.YELLOW_CONCRETE, c(241, 175, 21));
         colorMap.put(Material.RED_CONCRETE, c(143, 33, 33));
         colorMap.put(Material.PURPLE_CONCRETE, c(100, 32, 157));
         colorMap.put(Material.PINK_CONCRETE, c(214, 101, 143));
@@ -30,7 +29,6 @@ public class Colors {
 
         colorMap.put(Material.TERRACOTTA, c(152, 95, 69));
         colorMap.put(Material.WHITE_TERRACOTTA, c(184,131, 34));
-        colorMap.put(Material.YELLOW_TERRACOTTA, c(210, 179, 162));
         colorMap.put(Material.RED_TERRACOTTA, c(141, 59, 46));
         colorMap.put(Material.PURPLE_TERRACOTTA, c(118, 70, 86));
         colorMap.put(Material.PINK_TERRACOTTA, c(160, 75, 74));

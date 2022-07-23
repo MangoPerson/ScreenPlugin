@@ -2,15 +2,22 @@ package com.github.mangoperson.screenplugin.util;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Server;
+import org.bukkit.World;
+import org.bukkit.WorldType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.lang.model.type.ArrayType;
+import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class SCommand implements TabExecutor {
     protected CommandSender sender;
@@ -145,18 +152,59 @@ public abstract class SCommand implements TabExecutor {
     }
 
     //get arguments for a command option
-    protected String[] oargs(String opt) {
+    protected List<String> oargs(String opt) {
         for (List<String> as : options) {
             if (as.get(0).equalsIgnoreCase("--" + opt)) {
                 as.remove(0);
-                return as.toArray(new String[0]);
+                return as;
             }
         }
-        return new String[0];
+        return new ArrayList<>();
+    }
+
+    //convenience functions for option checking
+    protected void useOption(String name, Consumer<String[]> function) {
+        String[] ops = oargs(name).toArray(new String[0]);
+        if (ops.length > 0) {
+            function.accept(ops);
+        }
+    }
+    //use a non-string option
+    protected <T> boolean useNSOption(String name, String failMessage, Function<String, T> converter, Consumer<List<T>> function) {
+        List<String> ops = oargs(name);
+
+        if (ops.size() > 0) {
+            if (ops.stream().allMatch(str -> canConvert(str, converter))) {
+                List<T> t = convertAll(ops, converter);
+                function.accept(t);
+            }
+            else {
+                reply(failMessage);
+                return false;
+            }
+        }
+        return true;
     }
 
     //test if a string is parsable as a number
     protected static boolean isNumber(String s) {
         return NumberUtils.isParsable(s);
+    }
+
+    //convenience functions to operate on all members of an array or collection
+    public static <I, O> List<O> convertAll(List<I> input, Function<I, O> function) {
+        List<O> result = new ArrayList<>();
+        for (I i : input) {
+            result.add(function.apply(i));
+        }
+        return result;
+    }
+    protected static <I, O> boolean canConvert(I i, Function<I, O> converter) {
+        try {
+            converter.apply(i);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

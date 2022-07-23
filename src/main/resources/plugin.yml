@@ -14,7 +14,7 @@ commands:
     usage: Use /mworld help for help
   mwcreate:
     description: Create a world with MWorld
-    usage: "Usage: /mwcreate <name> [--t <worldtype: normal|flat|amplififed|large_biomes>]"
+    usage: "Usage: /mwcreate <name> [--t <worldtype: normal|flat|amplififed|large_biomes>] [--s <seed>]"
   mwtp:
     description: Teleport to a world with MWorld
     usage: "Usage: /mwtp <world> <x> <y> <z>"
@@ -24,3 +24,6 @@ commands:
   mwremove:
     description: Delete a world
     usage: "Usage: /mwremove <world>"
+  mwhelp:
+    description: Get help about MWorld commands
+    usage: "Usage: /mwhelp"

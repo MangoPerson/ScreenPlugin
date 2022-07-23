@@ -50,15 +50,15 @@ public class MWTeleportCommand extends SCommand {
         }
 
         //initialize xyz
-        int x = 0;
-        int y = 0;
-        int z = 0;
+        double x = 0;
+        double y = 0;
+        double z = 0;
 
         //if the player set the xyz, use them. If not, keep as default of 0, 0, 0
         if (!useDefault) {
-            x = Integer.parseInt(args[1]);
-            y = Integer.parseInt(args[2]);
-            z = Integer.parseInt(args[3]);
+            x = Double.parseDouble(args[1]);
+            y = Double.parseDouble(args[2]);
+            z = Double.parseDouble(args[3]);
         }
 
         //teleport the player

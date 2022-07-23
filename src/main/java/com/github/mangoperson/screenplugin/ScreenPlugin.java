@@ -19,6 +19,7 @@ public final class ScreenPlugin extends JavaPlugin {
         new MWRemoveCommand().register();
         new MWTeleportCommand().register();
         new MWListCommand().register();
+        new MWHelpCommand().register();
 
         cfgInit();
     }

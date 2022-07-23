@@ -33,31 +33,15 @@ public class ScreenCommand extends SCommand {
     @Override
     protected boolean run() {
         //set executing world to the server default world
-        World w = sender.getServer().getWorlds().get(0);;
+        final World[] world = {sender.getServer().getWorlds().get(0)};
 
-        //get world option
-        String[] opW = oargs("w");
-
-        //if world is specified
-        if (opW.length > 0) {
-            String wName = opW[0];
-            //if the world specified is invalid, use the sender's world instead
-            if (getServer().getWorld(wName) == null) {
-                reply(wName + " does not exist. Using default world instead");
-            } else {
-                //set the executing world to the user-specified world
-                w = getServer().getWorld(wName);;
-            }
+        if (sender instanceof Player) {
+            world[0] = ((Player) sender).getWorld();
+        } else if (sender instanceof BlockCommandSender) {
+            world[0] = ((BlockCommandSender) sender).getBlock().getWorld();
         }
-        //if the world is not specified
-        else {
-            //set the executing world to the world that the sender is in
-            if (sender instanceof Player) {
-                w = ((Player) sender).getWorld();
-            } else if (sender instanceof BlockCommandSender) {
-                w = ((BlockCommandSender) sender).getBlock().getWorld();
-            }
-        }
+        boolean w = useNSOption("w", "The world you specified does not exist. Using default world instead", str -> getServer().getWorld(str), ops -> world[0] = ops.get(0));
+        if (!w) return true;
 
         //retrieve image name from the config file
         String imgName = (String) cfg("image-name");
@@ -73,47 +57,26 @@ public class ScreenCommand extends SCommand {
 
         //retrieve location from the config file
         List<Integer> location = (List<Integer>) cfg("screen-location");
+
+        boolean l = useNSOption("l", "xyz must be valid coordinates", str -> Integer.valueOf(str), ops -> {
+            location.set(0, ops.get(0));
+            location.set(1, ops.get(1));
+            location.set(2, ops.get(2));
+        });
+        if (!l) return true;
+
         int x = location.get(0);
         int y = location.get(1);
         int z = location.get(2);
-
-        //get location options
-        String[] opL = oargs("l");
-
-        //if location is specified
-        if (opL.length > 0) {
-            //make sure x, y, z are numbers
-            if(!isNumber(opL[0]) || !isNumber(opL[1]) || !isNumber(opL[2])) {
-                reply("x, y, and z must be valid coordinates");
-                return true;
-            }
-            //rewrite values x, y, and z to the user-specified values
-            x = Integer.parseInt(opL[0]);
-            y = Integer.parseInt(opL[1]);
-            z = Integer.parseInt(opL[2]);
-        }
 
         //set the width and height to user-specified values
         int width = Integer.parseInt(args[0]);
         int height = Integer.parseInt(args[1]);
 
-        double satModifier = 1;
+        final double[] satModifier = {1};
 
-        //get saturation options
-        String[] stL = oargs("s");
-
-        //if saturation is specified
-        if (stL.length > 0) {
-            //make sure it's a positive number
-            if (!isNumber(stL[0]) || stL[0].startsWith("-")) {
-                reply("Saturation modifier must be a posistive number");
-                return true;
-            }
-            //set the saturation modifier to the user-defined value
-            satModifier = Double.parseDouble(stL[0]);
-        }
-
-        System.out.println(satModifier);
+        boolean s = useNSOption("s", "Saturation level must be a valid number", str -> Double.valueOf(str), ops -> satModifier[0] = ops.get(0));
+        if (!s) return true;
 
         //generate the image within the game
         //iterate through columns of the image
@@ -123,21 +86,22 @@ public class ScreenCommand extends SCommand {
                 //get the closest material to the color value of the pixel at (i, j) in the image
                 Color col = new Color(img.getRGB((int)i, (int)j));
                 float[] hsb = Color.RGBtoHSB(col.getRed(), col.getGreen(), col.getBlue(), null);
-                hsb[1] = (float) Math.pow(hsb[1], satModifier);
+                hsb[1] = (float) Math.pow(hsb[1], satModifier[0]);
                 Material closest = Colors.closestBlock(Color.getHSBColor(hsb[0], hsb[1], hsb[2]));
                 //set the block corresponding to the image pixel to the closest material, making sure it's within the user-defined width and height
-                new Location(w, i*width/img.getWidth() + x, height - j*height/img.getHeight() + y, z).getBlock().setType(closest);
+                new Location(world[0], i*width/img.getWidth() + x, height - j*height/img.getHeight() + y, z).getBlock().setType(closest);
             }
         }
 
-        reply(width + "x" + height + " image generated at " + x + ", " + y + ", " + z + " in " + w.getName());
+        reply(width + "x" + height + " image generated at " + x + ", " + y + ", " + z + " in " + world[0].getName());
         return true;
     }
 
     @Override
     protected List<String> tabComplete(int arg) {
+        System.out.println(arg);
         if (arg < 1) return new ArrayList<>();
-        if (args[arg-1] == "--w") {
+        if (args[arg-1].equalsIgnoreCase("--w")) {
             //get list of world names
             List<String> names = new ArrayList<>();
             for (World world : getServer().getWorlds()) {
