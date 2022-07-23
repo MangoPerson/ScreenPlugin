@@ -25,8 +25,8 @@ public class ScreenCommand extends SCommand {
     @Override
     protected boolean checkArgs() {
         if (args.length != 2) return false;
-        if (!NumberUtils.isParsable(args[0])) return false;
-        if (!NumberUtils.isParsable(args[1])) return false;
+        if (!isNumber(args[0])) return false;
+        if (!isNumber(args[1])) return false;
         return true;
     }
 
@@ -53,19 +53,22 @@ public class ScreenCommand extends SCommand {
             throw new RuntimeException(e);
         }
 
+        List<Integer> location = (List<Integer>) cfg("screen-location");
+        int x = location.get(0);
+        int y = location.get(1);
+        int z = location.get(2);
+
         int width = Integer.parseInt(args[0]);
         int height = Integer.parseInt(args[1]);
 
         for (float i = 0; i < img.getWidth(); i++) {
             for (float j = 0; j < img.getHeight(); j++) {
                 Material closest = Colors.closestBlock(new Color(img.getRGB((int)i, (int)j)));
-                List<Integer> location = (List) cfg("screen-location");
-                int x = location.get(0);
-                int y = location.get(1);
-                int z = location.get(2);
                 new Location(w, i*width/img.getWidth() + x, height - j*height/img.getHeight() + y, z).getBlock().setType(closest);
             }
         }
+
+        reply(width + "x" + height + " image generated at " + x + ", " + y + ", " + z + " in " + w.getName());
         return true;
     }
 }

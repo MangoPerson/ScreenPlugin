@@ -9,3 +9,18 @@ commands:
   screen:
     description: Update the screen
     usage: "Usage: /screen <width> <height>"
+  mworld:
+    description: Use MWorld commands
+    usage: Use /mworld help" for help
+  mwcreate:
+    description: Create a world with MWorld
+    usage: "Usage: /mwcreate <name> [options: --t <worldtype: normal|flat|amplififed|large_biomes>]"
+  mwtp:
+    description: Teleport to a world with MWorld
+    usage: "Usage: /mwtp <world> <x> <y> <z>"
+  mwlist:
+    description: List all worlds
+    usage: /mwlist
+  mwremove:
+    description: Delete a world
+    usage: /mwremove

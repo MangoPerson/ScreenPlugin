@@ -1,13 +1,24 @@
 package com.github.mangoperson.screenplugin;
 
-import com.github.mangoperson.screenplugin.commands.ScreenCommand;
+import com.github.mangoperson.screenplugin.commands.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ScreenPlugin extends JavaPlugin {
+
+    private static ScreenPlugin instance;
+
     @Override
     public void onEnable() {
-        new ScreenCommand().register(this);
+        instance = this;
+
+        new ScreenCommand().register();
+        new MWorldCommand().register();
+
+        new MWCreateCommand().register();
+        new MWRemoveCommand().register();
+        new MWTeleportCommand().register();
+        new MWListCommand().register();
 
         cfgInit();
     }
@@ -19,5 +30,9 @@ public final class ScreenPlugin extends JavaPlugin {
         config.options().copyDefaults(true);
         saveConfig();
         saveDefaultConfig();
+    }
+
+    public static ScreenPlugin getInstance() {
+        return instance;
     }
 }
