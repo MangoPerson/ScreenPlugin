@@ -99,7 +99,6 @@ public class ScreenCommand extends SCommand {
 
     @Override
     protected List<String> tabComplete(int arg) {
-        System.out.println(arg);
         if (arg < 1) return new ArrayList<>();
         if (args[arg-1].equalsIgnoreCase("--w")) {
             //get list of world names

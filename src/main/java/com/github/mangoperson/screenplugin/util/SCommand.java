@@ -13,6 +13,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.lang.model.type.ArrayType;
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
@@ -129,11 +130,6 @@ public abstract class SCommand implements TabExecutor {
         return ScreenPlugin.getInstance().getConfig().get(key);
     }
 
-    //get the server that this command was run on
-    protected Server getServer() {
-        return ScreenPlugin.getInstance().getServer();
-    }
-
     //send a message to the sender of the command
     protected void reply(String message) {
         sender.sendMessage(message);
@@ -199,12 +195,40 @@ public abstract class SCommand implements TabExecutor {
         }
         return result;
     }
-    protected static <I, O> boolean canConvert(I i, Function<I, O> converter) {
+    public static <I, O> List<O> convertAll(I[] input, Function<I, O> function) {
+        return convertAll(Arrays.asList(input), function);
+    }
+    public static <I, O> boolean canConvert(I i, Function<I, O> converter) {
         try {
             converter.apply(i);
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+    public static <T> T getFirstMatch(List<T> list, Predicate<T> condition) {
+        for (T t : list) {
+            if (condition.test(t)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    //get the server that this command was run on
+    protected static Server getServer() {
+        return ScreenPlugin.getInstance().getServer();
+    }
+
+    public static List<File> getUnloadedWorlds() {
+        List<File> worlds = new ArrayList<>();
+        File dir = new File("./");
+        for (File f : dir.listFiles()) {
+            if (!f.isDirectory()) continue;
+            if (getServer().getWorld(f.getName()) != null) continue;
+            if (!new File(f.getAbsolutePath() + "/level.dat").exists()) continue;
+            worlds.add(f);
+        }
+        return worlds;
     }
 }

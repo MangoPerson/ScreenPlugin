@@ -12,6 +12,8 @@ public class MWorldCommand extends SCommand {
         addSubCommand("remove", new MWRemoveCommand());
         addSubCommand("teleport", new MWTeleportCommand());
         addSubCommand("list", new MWListCommand());
+        addSubCommand("load", new MWLoadCommand());
+        addSubCommand("unload", new MWUnloadCommand());
     }
 
     @Override

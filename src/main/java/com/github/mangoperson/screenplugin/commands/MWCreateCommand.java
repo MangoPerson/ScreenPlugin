@@ -1,11 +1,10 @@
 package com.github.mangoperson.screenplugin.commands;
 
+import com.github.mangoperson.screenplugin.ScreenPlugin;
 import com.github.mangoperson.screenplugin.util.SCommand;
-import org.apache.commons.lang3.EnumUtils;
-import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
-import org.checkerframework.checker.units.qual.A;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,10 @@ public class MWCreateCommand extends SCommand {
             reply(args[0] + " already exists");
             return true;
         }
+        if (getUnloadedWorlds().stream().anyMatch(f -> f.getName().equalsIgnoreCase(args[0]))) {
+            reply(args[0] + " is an unloaded world. Please use /mwload to load it");
+            return true;
+        }
 
         //make a world creator with the name specified
         WorldCreator wc = new WorldCreator(args[0]);
@@ -40,6 +43,12 @@ public class MWCreateCommand extends SCommand {
 
         //create the world
         wc.createWorld();
+        FileConfiguration config = ScreenPlugin.getInstance().getConfig();
+        List<String> worldNames = config.getStringList("loaded-worlds");
+        worldNames.add(wc.name());
+        config.set("loaded-worlds", worldNames);
+        ScreenPlugin.getInstance().saveConfig();
+        ScreenPlugin.getInstance().saveDefaultConfig();
         reply("Created " + wc.type().getName().toLowerCase() + " world \"" + wc.name() + "\"" + " with seed " + wc.seed());
         return true;
     }

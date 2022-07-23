@@ -27,3 +27,9 @@ commands:
   mwhelp:
     description: Get help about MWorld commands
     usage: "Usage: /mwhelp"
+  mwload:
+    description: Load a folder to the server from the drive
+    usage: "Usage: /mwload <directory>"
+  mwunload:
+    description: Unload a world from the server without deleting it
+    usage: "Usage: /mwunload <world>"
