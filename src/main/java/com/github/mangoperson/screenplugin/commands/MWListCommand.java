@@ -11,12 +11,15 @@ public class MWListCommand extends SCommand {
     @Override
     protected boolean run() {
         String result = "Current worlds are: ";
+        //add each world to the list
         for (World w : getServer().getWorlds()) {
             result += w.getName() + ", ";
         }
 
+        //remove the final ", " from the string
         result = result.substring(0, result.length() - 2);
 
+        //report to the user
         reply(result);
         return true;
     }

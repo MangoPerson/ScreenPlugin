@@ -36,9 +36,11 @@ public abstract class SCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] inArgs) {
+        //sort given args into command arguments and options
         List<List<String>> preOpts = new ArrayList<>();
         List<String> preArgs = new ArrayList<>();
 
+        //after the first arg beginning in --, set all following args to be in the options category
         boolean opsStarted = false;
         if (inArgs.length > 0) {
             for (String s : inArgs) {
@@ -53,13 +55,19 @@ public abstract class SCommand implements TabExecutor {
             }
         }
 
+        //set the class values for options and args to the sorted arguments
         options = new HashSet<>(preOpts);
         args = preArgs.toArray(new String[0]);
 
+        //if the command has subcommands
         if (subCommands.size() > 0) {
+            //make sure that a subcommand is being used
             if (args.length < 1) return false;
+            //iterate through all subcommands
             for (Map.Entry<String, SCommand> subCommand : subCommands.entrySet()) {
+                //find the subcommand that matches the given one
                 if (args[0].equalsIgnoreCase(subCommand.getKey())) {
+                    //run the subcommand's defined run function
                     SCommand cmd = subCommand.getValue();
                     cmd.sender = sender;
                     cmd.args = ArrayUtils.remove(args, 0);
@@ -68,6 +76,7 @@ public abstract class SCommand implements TabExecutor {
             }
             return false;
         }
+        //if the command has no subcommands, make sure the args are correct and run the command
         if (!checkArgs()) return false;
         this.sender = sender;
         return run();
@@ -75,6 +84,7 @@ public abstract class SCommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+        //everything in here is the same as in the onCommand function, but with tabComplete instead of run and without options
         this.sender = sender;
         this.args = args;
         if (subCommands.size() > 0) {
@@ -96,27 +106,33 @@ public abstract class SCommand implements TabExecutor {
         return new ArrayList<>();
     }
 
+    //register the command executor to the plugin under this command's name
     public void register() {
         ScreenPlugin.getInstance().getCommand(name).setExecutor(this);
         ScreenPlugin.getInstance().getCommand(name).setTabCompleter(this);
     }
 
+    //add a subcommand to this command
     public void addSubCommand(String name, SCommand subCommand) {
         subCommands.put(name, subCommand);
     }
 
+    //retrieve a value from the config file
     protected Object cfg(String key) {
         return ScreenPlugin.getInstance().getConfig().get(key);
     }
 
+    //get the server that this command was run on
     protected Server getServer() {
         return ScreenPlugin.getInstance().getServer();
     }
 
+    //send a message to the sender of the command
     protected void reply(String message) {
         sender.sendMessage(message);
     }
 
+    //only show tabcomplete options that start with what has already been typed
     private List<String> filter(List<String> tabOptions) {
         List<String> result = new ArrayList<>();
         tabOptions.forEach(s -> {
@@ -128,6 +144,7 @@ public abstract class SCommand implements TabExecutor {
         return result;
     }
 
+    //get arguments for a command option
     protected String[] oargs(String opt) {
         for (List<String> as : options) {
             if (as.get(0).equalsIgnoreCase("--" + opt)) {
@@ -138,6 +155,7 @@ public abstract class SCommand implements TabExecutor {
         return new String[0];
     }
 
+    //test if a string is parsable as a number
     protected static boolean isNumber(String s) {
         return NumberUtils.isParsable(s);
     }

@@ -24,6 +24,7 @@ public final class ScreenPlugin extends JavaPlugin {
     }
 
     public void cfgInit() {
+        //add default config values
         FileConfiguration config = getConfig();
         config.addDefault("image-name", "image.png");
         config.addDefault("screen-location", new int[] {0, 0, 0});

@@ -8,8 +8,9 @@ import java.util.Map;
 
 public class Colors {
     public static HashMap<Material, Color> getColorMap() {
-        HashMap<Material, Color> colorMap = new HashMap<Material, Color>();
+        HashMap<Material, Color> colorMap = new HashMap<>();
 
+        //define average RGB for all concrete and terracotta blocks
         colorMap.put(Material.WHITE_CONCRETE, c(208, 214 ,214));
         colorMap.put(Material.YELLOW_CONCRETE, c(241, 175, 21));
         colorMap.put(Material.RED_CONCRETE, c(143, 33, 33));
@@ -48,24 +49,31 @@ public class Colors {
         return colorMap;
     }
 
+    //find closest average color to a given color
     public static Material closestBlock(Color col) {
+        //set record low difference to the maximum (255*3)
         int lowest = 765;
         Material lowestMat = null;
 
+        //iterate through the material-color map
         for (Map.Entry<Material, Color> pair : getColorMap().entrySet()) {
+            //find the difference between the color of the block and the given color
             Color mCol = pair.getValue();
             int diff = Math.abs(col.getRed() - mCol.getRed())
                     + Math.abs(col.getGreen() - mCol.getGreen())
                     + Math.abs(col.getBlue() - mCol.getBlue());
+            //if the difference is lower than the previous lowest difference, set the new lowest and material to this one
             if (diff < lowest) {
                 lowest = diff;
                 lowestMat = pair.getKey();
             }
         }
 
+        //return the material with the lowest color difference from the given color
         return lowestMat;
     }
 
+    //convenience function for easier initialization of colors in the hashmap
     private static Color c(int red, int green, int blue) {
         return new Color(red, green, blue);
     }

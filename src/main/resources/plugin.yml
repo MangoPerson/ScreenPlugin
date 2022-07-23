@@ -8,19 +8,19 @@ website: https://github.com/mangoperson
 commands:
   screen:
     description: Update the screen
-    usage: "Usage: /screen <width> <height>"
+    usage: "Usage: /screen <width> <height> [--w <world>] [--l <x> <y> <z>]"
   mworld:
     description: Use MWorld commands
-    usage: Use /mworld help" for help
+    usage: Use /mworld help for help
   mwcreate:
     description: Create a world with MWorld
-    usage: "Usage: /mwcreate <name> [options: --t <worldtype: normal|flat|amplififed|large_biomes>]"
+    usage: "Usage: /mwcreate <name> [--t <worldtype: normal|flat|amplififed|large_biomes>]"
   mwtp:
     description: Teleport to a world with MWorld
     usage: "Usage: /mwtp <world> <x> <y> <z>"
   mwlist:
     description: List all worlds
-    usage: /mwlist
+    usage: "Usage: /mwlist"
   mwremove:
     description: Delete a world
-    usage: /mwremove
+    usage: "Usage: /mwremove <world>"
