@@ -1,17 +1,19 @@
 package com.github.mangoperson.screenplugin;
 
 import com.github.mangoperson.screenplugin.commands.*;
-import com.github.mangoperson.screenplugin.util.SCommand;
+import com.github.mangoperson.screenplugin.util.*;
+import org.bukkit.Material;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.util.List;
+import java.awt.*;
 
 public final class ScreenPlugin extends JavaPlugin {
 
     private static ScreenPlugin instance;
+
+    private static MMap<Material, Color> colorMap;
 
     @Override
     public void onEnable() {
@@ -30,6 +32,7 @@ public final class ScreenPlugin extends JavaPlugin {
 
         cfgInit();
         loadWorlds();
+        colorMap = Colors.getColorMap();
     }
 
     public void cfgInit() {
@@ -45,16 +48,16 @@ public final class ScreenPlugin extends JavaPlugin {
 
     public void loadWorlds() {
         FileConfiguration config = getConfig();
-        List<String> worldNames = config.getStringList("loaded-worlds");
-        for (String name : worldNames) {
-            File worldFile = SCommand.getFirstMatch(SCommand.getUnloadedWorlds(), f -> f.getName().equalsIgnoreCase(name));
-            if (worldFile != null) {
-                new WorldCreator(name).createWorld();
-            }
-        }
+        new MList<>(config.getStringList("loaded-worlds"))
+                .filter(n -> SCommand.getUnloadedWorlds().filter(f -> f.getName().equalsIgnoreCase(n)).size() > 0)
+                .forEach(n -> new WorldCreator(n).createWorld());
     }
 
     public static ScreenPlugin getInstance() {
         return instance;
+    }
+
+    public static MMap<Material, Color> getColorMap() {
+        return colorMap;
     }
 }

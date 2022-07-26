@@ -1,6 +1,7 @@
 package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.util.Colors;
+import com.github.mangoperson.screenplugin.util.MList;
 import com.github.mangoperson.screenplugin.util.SCommand;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,7 +14,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ScreenCommand extends SCommand {
@@ -78,6 +78,11 @@ public class ScreenCommand extends SCommand {
         boolean s = useNSOption("s", "Saturation level must be a valid number", str -> Double.valueOf(str), ops -> satModifier[0] = ops.get(0));
         if (!s) return true;
 
+        boolean isH = false;
+        if (hasOption("h")) {
+            isH = true;
+        }
+
         //generate the image within the game
         //iterate through columns of the image
         for (float i = 0; i < img.getWidth(); i++) {
@@ -89,7 +94,7 @@ public class ScreenCommand extends SCommand {
                 hsb[1] = (float) Math.pow(hsb[1], satModifier[0]);
                 Material closest = Colors.closestBlock(Color.getHSBColor(hsb[0], hsb[1], hsb[2]));
                 //set the block corresponding to the image pixel to the closest material, making sure it's within the user-defined width and height
-                new Location(world[0], i*width/img.getWidth() + x, height - j*height/img.getHeight() + y, z).getBlock().setType(closest);
+                new Location(world[0], x + i*width/img.getWidth(), y + (isH ? (height - j*height/img.getHeight()) : 0), z + (isH ? 0 : (height - j*height/img.getHeight()))).getBlock().setType(closest);
             }
         }
 
@@ -98,16 +103,14 @@ public class ScreenCommand extends SCommand {
     }
 
     @Override
-    protected List<String> tabComplete(int arg) {
-        if (arg < 1) return new ArrayList<>();
+    protected MList<String> tabComplete(int arg) {
+        if (arg < 1) return new MList<>();
         if (args[arg-1].equalsIgnoreCase("--w")) {
             //get list of world names
-            List<String> names = new ArrayList<>();
-            for (World world : getServer().getWorlds()) {
-                names.add(world.getName());
-            }
-            return names;
+            return getServer().getWorlds().stream()
+                    .map(f -> f.getName())
+                    .collect(MList.toMList());
         }
-        return new ArrayList<>();
+        return new MList<>();
     }
 }

@@ -1,12 +1,13 @@
 package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
+import com.github.mangoperson.screenplugin.util.MList;
 import com.github.mangoperson.screenplugin.util.SCommand;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MWCreateCommand extends SCommand {
@@ -54,16 +55,13 @@ public class MWCreateCommand extends SCommand {
     }
 
     @Override
-    protected List<String> tabComplete(int arg) {
-        if (arg < 1) return new ArrayList<>();
+    protected MList<String> tabComplete(int arg) {
+        if (arg < 1) return new MList<>();
         if (args[arg-1].equalsIgnoreCase("--t")) {
-            //get list of world names
-            List<String> names = new ArrayList<>();
-            for (WorldType type : WorldType.values()) {
-                names.add(type.name().toLowerCase());
-            }
-            return names;
+            return Arrays.stream(WorldType.values())
+                    .map(wt -> wt.getName())
+                    .collect(MList.toMList());
         }
-        return new ArrayList<>();
+        return new MList<>();
     }
 }

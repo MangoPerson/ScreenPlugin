@@ -1,14 +1,14 @@
 package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
+import com.github.mangoperson.screenplugin.util.MList;
 import com.github.mangoperson.screenplugin.util.SCommand;
-import org.bukkit.Bukkit;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MWLoadCommand extends SCommand {
     public MWLoadCommand() {
@@ -17,7 +17,10 @@ public class MWLoadCommand extends SCommand {
 
     @Override
     protected boolean run() {
-        File file = getFirstMatch(getUnloadedWorlds(), f -> (f.getName().equalsIgnoreCase(args[0])));
+        File file = getUnloadedWorlds().stream()
+                .filter(f -> (f.getName().equalsIgnoreCase(args[0])))
+                .collect(Collectors.toList())
+                .get(0);
         if (file == null) {
             reply("The directory you specified does not exist");
             return true;
@@ -35,12 +38,14 @@ public class MWLoadCommand extends SCommand {
     }
 
     @Override
-    protected List<String> tabComplete(int arg) {
+    protected MList<String> tabComplete(int arg) {
         switch (arg) {
             case 0:
-                return convertAll(getUnloadedWorlds(), f -> f.getName());
+                return getUnloadedWorlds()
+                        .map(f -> f.getName())
+                        .collect(MList.toMList());
             default:
-                return new ArrayList<>();
+                return new MList<>();
         }
     }
 

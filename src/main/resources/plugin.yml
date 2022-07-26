@@ -33,3 +33,6 @@ commands:
   mwunload:
     description: Unload a world from the server without deleting it
     usage: "Usage: /mwunload <world>"
+  mwscore:
+    description: Handle MWorld scoreboards
+    usage: "Usage: /mwscore"

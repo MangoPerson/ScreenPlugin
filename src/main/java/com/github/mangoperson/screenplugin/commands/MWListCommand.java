@@ -1,7 +1,8 @@
 package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.util.SCommand;
-import org.bukkit.World;
+
+import java.util.stream.Collectors;
 
 public class MWListCommand extends SCommand {
     public MWListCommand() {
@@ -10,17 +11,11 @@ public class MWListCommand extends SCommand {
 
     @Override
     protected boolean run() {
-        String result = "Current worlds are: ";
-        //add each world to the list
-        for (World w : getServer().getWorlds()) {
-            result += w.getName() + ", ";
-        }
-
-        //remove the final ", " from the string
-        result = result.substring(0, result.length() - 2);
-
-        //report to the user
-        reply(result);
+        reply("Current worlds are: " +
+                getServer().getWorlds().stream()
+                        .map(w -> w.getName())
+                        .collect(Collectors.joining(", "))
+        );
         return true;
     }
 }

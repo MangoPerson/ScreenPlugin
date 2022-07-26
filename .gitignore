@@ -1,6 +1,9 @@
 # User-specific stuff
 .idea/
 
+# Test files
+src/test/
+
 *.iml
 *.ipr
 *.iws

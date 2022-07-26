@@ -2,31 +2,26 @@ package com.github.mangoperson.screenplugin.util;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Server;
-import org.bukkit.World;
-import org.bukkit.WorldType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.lang.model.type.ArrayType;
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class SCommand implements TabExecutor {
     protected CommandSender sender;
     protected String[] args;
 
-    protected Set<List<String>> options;
+    protected MList<MList<String>> options;
     protected final String name;
-    protected HashMap<String, SCommand> subCommands = new HashMap<>();
+    protected MMap<String, SCommand> subCommands = new MMap<>();
 
     protected abstract boolean run();
 
@@ -34,18 +29,20 @@ public abstract class SCommand implements TabExecutor {
         this.name = name;
     }
 
-    protected List<String> tabComplete(int arg) {
-        return new ArrayList<>();
+    protected MList<String> tabComplete(int arg) {
+        return new MList<>();
     }
 
     protected boolean checkArgs() {
         return true;
     }
 
+    protected Predicate<String> tabFilter = s -> s.startsWith(args[args.length-1]);
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] inArgs) {
         //sort given args into command arguments and options
-        List<List<String>> preOpts = new ArrayList<>();
+        MList<MList<String>> preOpts = new MList<>();
         List<String> preArgs = new ArrayList<>();
 
         //after the first arg beginning in --, set all following args to be in the options category
@@ -56,7 +53,7 @@ public abstract class SCommand implements TabExecutor {
                 opsStarted = opsStarted || sw;
 
                 if (opsStarted) {
-                    if (sw) preOpts.add(new ArrayList<>());
+                    if (sw) preOpts.add(new MList<>());
                     int i = preOpts.size() - 1;
                     preOpts.get(i).add(s);
                 } else preArgs.add(s);
@@ -64,25 +61,22 @@ public abstract class SCommand implements TabExecutor {
         }
 
         //set the class values for options and args to the sorted arguments
-        options = new HashSet<>(preOpts);
+        options = preOpts;
         args = preArgs.toArray(new String[0]);
 
         //if the command has subcommands
         if (subCommands.size() > 0) {
             //make sure that a subcommand is being used
             if (args.length < 1) return false;
-            //iterate through all subcommands
-            for (Map.Entry<String, SCommand> subCommand : subCommands.entrySet()) {
-                //find the subcommand that matches the given one
-                if (args[0].equalsIgnoreCase(subCommand.getKey())) {
-                    //run the subcommand's defined run function
-                    SCommand cmd = subCommand.getValue();
-                    cmd.sender = sender;
-                    cmd.args = ArrayUtils.remove(args, 0);
-                    return cmd.onCommand(sender, command, label, cmd.args);
-                }
-            }
-            return false;
+            return subCommands
+                    .filter((n, c) -> args[0].equalsIgnoreCase(n))
+                    .map((n, c) -> {
+                        c.sender = sender;
+                        c.args = ArrayUtils.remove(args, 0);
+                        return c.onCommand(sender, command, label, c.args);
+                    })
+                    .addR(false)
+                    .get(0);
         }
         //if the command has no subcommands, make sure the args are correct and run the command
         if (!checkArgs()) return false;
@@ -97,19 +91,20 @@ public abstract class SCommand implements TabExecutor {
         this.args = args;
         if (subCommands.size() > 0) {
             if (args.length <= 1) {
-                return filter(new ArrayList<>(subCommands.keySet()));
+                return subCommands.keyList();
             }
-            for (Map.Entry<String, SCommand> subCommand : subCommands.entrySet()) {
-                if (args[0].equalsIgnoreCase(subCommand.getKey())) {
-                    SCommand cmd = subCommand.getValue();
-                    cmd.args = ArrayUtils.remove(args, 0);
-                    return filter(cmd.onTabComplete(sender, command, label, cmd.args));
-                }
-            }
-            return new ArrayList<>();
+            return subCommands
+                    .filter((n, c) -> args[0].equalsIgnoreCase(n))
+                    .map((n, c) -> {
+                        c.args = ArrayUtils.remove(args, 0);
+                        return c.onTabComplete(sender, command, label, c.args).stream()
+                                .filter(tabFilter)
+                                .collect(Collectors.toList());
+                    })
+                    .get(0);
         }
-        List<String> tabList = tabComplete(args.length - 1);
-        if (tabList != null) return filter(tabList);
+        MList<String> tabList = new MList<>(tabComplete(args.length - 1));
+        if (tabList != null) return tabList.filter(tabFilter);
 
         return new ArrayList<>();
     }
@@ -122,7 +117,7 @@ public abstract class SCommand implements TabExecutor {
 
     //add a subcommand to this command
     public void addSubCommand(String name, SCommand subCommand) {
-        subCommands.put(name, subCommand);
+        subCommands.add(name, subCommand);
     }
 
     //retrieve a value from the config file
@@ -135,43 +130,41 @@ public abstract class SCommand implements TabExecutor {
         sender.sendMessage(message);
     }
 
-    //only show tabcomplete options that start with what has already been typed
-    private List<String> filter(List<String> tabOptions) {
-        List<String> result = new ArrayList<>();
-        tabOptions.forEach(s -> {
-            if (s.startsWith(args[args.length - 1])) {
-                result.add(s);
-            }
-        });
-
-        return result;
-    }
-
     //get arguments for a command option
-    protected List<String> oargs(String opt) {
-        for (List<String> as : options) {
-            if (as.get(0).equalsIgnoreCase("--" + opt)) {
-                as.remove(0);
-                return as;
-            }
+    protected Optional<MList<String>> oargs(String opt) {
+        MList<MList<String>> matching = options.filter(as -> as.get(0).equalsIgnoreCase("--" + opt));
+        if (matching.size() > 0) {
+            return Optional.of(matching
+                    .get(0)
+                    .removeR(0)
+            );
         }
-        return new ArrayList<>();
+        return Optional.empty();
     }
 
+    protected boolean hasOption(String name) {
+        return options
+                .filter(as -> as.addR("").get(0).equalsIgnoreCase("--" + name))
+                .size() > 0;
+    }
     //convenience functions for option checking
     protected void useOption(String name, Consumer<String[]> function) {
-        String[] ops = oargs(name).toArray(new String[0]);
+        String[] ops = oargs(name).isPresent() ? oargs(name).get().toArray(new String[0]) : new String[0];
         if (ops.length > 0) {
             function.accept(ops);
         }
     }
     //use a non-string option
     protected <T> boolean useNSOption(String name, String failMessage, Function<String, T> converter, Consumer<List<T>> function) {
-        List<String> ops = oargs(name);
+        Optional<MList<String>> o = oargs(name);
+        if (o.isEmpty()) return true;
+        MList<String> ops = o.get();
 
         if (ops.size() > 0) {
-            if (ops.stream().allMatch(str -> canConvert(str, converter))) {
-                List<T> t = convertAll(ops, converter);
+            if (ops.allMatch(str -> canConvert(str, converter))) {
+                List<T> t = ops
+                        .map(converter)
+                        .collect(Collectors.toList());
                 function.accept(t);
             }
             else {
@@ -187,17 +180,6 @@ public abstract class SCommand implements TabExecutor {
         return NumberUtils.isParsable(s);
     }
 
-    //convenience functions to operate on all members of an array or collection
-    public static <I, O> List<O> convertAll(List<I> input, Function<I, O> function) {
-        List<O> result = new ArrayList<>();
-        for (I i : input) {
-            result.add(function.apply(i));
-        }
-        return result;
-    }
-    public static <I, O> List<O> convertAll(I[] input, Function<I, O> function) {
-        return convertAll(Arrays.asList(input), function);
-    }
     public static <I, O> boolean canConvert(I i, Function<I, O> converter) {
         try {
             converter.apply(i);
@@ -206,29 +188,16 @@ public abstract class SCommand implements TabExecutor {
         }
         return true;
     }
-    public static <T> T getFirstMatch(List<T> list, Predicate<T> condition) {
-        for (T t : list) {
-            if (condition.test(t)) {
-                return t;
-            }
-        }
-        return null;
-    }
-
-    //get the server that this command was run on
     protected static Server getServer() {
         return ScreenPlugin.getInstance().getServer();
     }
 
-    public static List<File> getUnloadedWorlds() {
-        List<File> worlds = new ArrayList<>();
+    public static MList<File> getUnloadedWorlds() {
         File dir = new File("./");
-        for (File f : dir.listFiles()) {
-            if (!f.isDirectory()) continue;
-            if (getServer().getWorld(f.getName()) != null) continue;
-            if (!new File(f.getAbsolutePath() + "/level.dat").exists()) continue;
-            worlds.add(f);
-        }
-        return worlds;
+        return Arrays.stream(dir.listFiles())
+                .filter(f -> f.isDirectory())
+                .filter(f -> getServer().getWorld(f.getName()) == null)
+                .filter(f -> new File(f.getAbsolutePath() + "/level.dat").exists())
+                .collect(MList.toMList());
     }
 }

@@ -1,13 +1,13 @@
 package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
+import com.github.mangoperson.screenplugin.util.MList;
 import com.github.mangoperson.screenplugin.util.SCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MWUnloadCommand extends SCommand {
@@ -51,17 +51,14 @@ public class MWUnloadCommand extends SCommand {
     }
 
     @Override
-    protected List<String> tabComplete(int arg) {
+    protected MList<String> tabComplete(int arg) {
         switch (arg) {
             case 0:
-                //get list of world names
-                List<String> names = new ArrayList<>();
-                for (World world : getServer().getWorlds()) {
-                    names.add(world.getName());
-                }
-                return names;
+                return getServer().getWorlds().stream()
+                        .map(f -> f.getName())
+                        .collect(MList.toMList());
             default:
-                return new ArrayList<>();
+                return new MList<>();
         }
     }
 }
