@@ -1,6 +1,8 @@
-package com.github.mangoperson.screenplugin.util;
+package com.github.mangoperson.screenplugin.util.render;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
+import com.github.mangoperson.screenplugin.util.MMap;
+import com.github.mangoperson.screenplugin.util.Pair;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import org.bukkit.Material;

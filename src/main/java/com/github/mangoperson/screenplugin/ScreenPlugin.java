@@ -2,6 +2,7 @@ package com.github.mangoperson.screenplugin;
 
 import com.github.mangoperson.screenplugin.commands.*;
 import com.github.mangoperson.screenplugin.util.*;
+import com.github.mangoperson.screenplugin.util.render.Colors;
 import org.bukkit.Material;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;

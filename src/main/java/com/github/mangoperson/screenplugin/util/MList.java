@@ -12,16 +12,19 @@ public class MList<E> extends ArrayList<E> {
         super(list);
     }
     public MList<E> addR(E e) {
-        add(e);
-        return this;
+        MList<E> m = this;
+        m.add(e);
+        return m;
     }
     public MList<E> removeR(E e) {
-        remove(e);
-        return this;
+        MList<E> m = this;
+        m.remove(e);
+        return m;
     }
     public MList<E> removeR(int index) {
-        remove(index);
-        return this;
+        MList<E> m = this;
+        m.remove(index);
+        return m;
     }
 
     public static <T> Collector<T, ?, MList<T>> toMList() {
@@ -34,6 +37,14 @@ public class MList<E> extends ArrayList<E> {
     public MList<E> filter(Predicate<? super E> predicate) {
         return stream().filter(predicate).collect(toMList());
     }
+    public Optional<E> getFirst(Predicate<? super E> predicate) {
+        MList<E> filtered = filter(predicate);
+        if (filtered.size() > 0) {
+            return Optional.of(filtered.get(0));
+        }
+        return Optional.empty();
+    }
+
     public <R> MList<R> map(Function<? super E, ? extends R> function) {
         return stream().map(function).collect(toMList());
     }

@@ -39,7 +39,7 @@ public class MWCreateCommand extends SCommand {
         boolean t = useNSOption("t", "Must use a valid world type (normal, flat, amplified, large_biomes)",
                 str -> WorldType.valueOf(str.toUpperCase()), ops -> wc.type(ops.get(0)));
         boolean s = useNSOption("s", "Seed must be a number",
-                str -> Long.valueOf(str), ops -> wc.seed(ops.get(0)));
+                Long::valueOf, ops -> wc.seed(ops.get(0)));
         if (!t || !s) return true;
 
         //create the world
@@ -59,7 +59,7 @@ public class MWCreateCommand extends SCommand {
         if (arg < 1) return new MList<>();
         if (args[arg-1].equalsIgnoreCase("--t")) {
             return Arrays.stream(WorldType.values())
-                    .map(wt -> wt.getName())
+                    .map(WorldType::getName)
                     .collect(MList.toMList());
         }
         return new MList<>();

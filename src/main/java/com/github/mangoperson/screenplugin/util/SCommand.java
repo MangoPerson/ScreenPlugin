@@ -195,7 +195,7 @@ public abstract class SCommand implements TabExecutor {
     public static MList<File> getUnloadedWorlds() {
         File dir = new File("./");
         return Arrays.stream(dir.listFiles())
-                .filter(f -> f.isDirectory())
+                .filter(File::isDirectory)
                 .filter(f -> getServer().getWorld(f.getName()) == null)
                 .filter(f -> new File(f.getAbsolutePath() + "/level.dat").exists())
                 .collect(MList.toMList());

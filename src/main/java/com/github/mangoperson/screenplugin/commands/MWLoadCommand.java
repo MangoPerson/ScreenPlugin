@@ -8,7 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class MWLoadCommand extends SCommand {
     public MWLoadCommand() {
@@ -17,11 +17,9 @@ public class MWLoadCommand extends SCommand {
 
     @Override
     protected boolean run() {
-        File file = getUnloadedWorlds().stream()
-                .filter(f -> (f.getName().equalsIgnoreCase(args[0])))
-                .collect(Collectors.toList())
-                .get(0);
-        if (file == null) {
+        Optional<File> file = getUnloadedWorlds()
+                .getFirst(f -> (f.getName().equalsIgnoreCase(args[0])));
+        if (file.isEmpty()) {
             reply("The directory you specified does not exist");
             return true;
         }
@@ -39,14 +37,12 @@ public class MWLoadCommand extends SCommand {
 
     @Override
     protected MList<String> tabComplete(int arg) {
-        switch (arg) {
-            case 0:
-                return getUnloadedWorlds()
-                        .map(f -> f.getName())
-                        .collect(MList.toMList());
-            default:
-                return new MList<>();
+        if (arg == 0) {
+            return getUnloadedWorlds()
+                    .map(File::getName)
+                    .collect(MList.toMList());
         }
+        return new MList<>();
     }
 
     @Override

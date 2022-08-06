@@ -1,6 +1,7 @@
 package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.util.SCommand;
+import org.bukkit.World;
 
 import java.util.stream.Collectors;
 
@@ -13,7 +14,7 @@ public class MWListCommand extends SCommand {
     protected boolean run() {
         reply("Current worlds are: " +
                 getServer().getWorlds().stream()
-                        .map(w -> w.getName())
+                        .map(World::getName)
                         .collect(Collectors.joining(", "))
         );
         return true;

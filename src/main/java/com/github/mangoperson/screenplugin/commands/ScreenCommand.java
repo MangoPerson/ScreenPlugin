@@ -1,22 +1,22 @@
 package com.github.mangoperson.screenplugin.commands;
 
-import com.github.mangoperson.screenplugin.util.Colors;
 import com.github.mangoperson.screenplugin.util.MList;
 import com.github.mangoperson.screenplugin.util.SCommand;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import com.github.mangoperson.screenplugin.util.render.Screen;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.WorldInfo;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public class ScreenCommand extends SCommand {
+
+    private static final MList<Screen> screens = new MList<>();
 
     public ScreenCommand() {
         super("screen");
@@ -58,7 +58,7 @@ public class ScreenCommand extends SCommand {
         //retrieve location from the config file
         List<Integer> location = (List<Integer>) cfg("screen-location");
 
-        boolean l = useNSOption("l", "xyz must be valid coordinates", str -> Integer.valueOf(str), ops -> {
+        boolean l = useNSOption("l", "xyz must be valid coordinates", Integer::valueOf, ops -> {
             location.set(0, ops.get(0));
             location.set(1, ops.get(1));
             location.set(2, ops.get(2));
@@ -75,27 +75,22 @@ public class ScreenCommand extends SCommand {
 
         final double[] satModifier = {1};
 
-        boolean s = useNSOption("s", "Saturation level must be a valid number", str -> Double.valueOf(str), ops -> satModifier[0] = ops.get(0));
+        boolean s = useNSOption("s", "Saturation level must be a valid number", Double::valueOf, ops -> satModifier[0] = ops.get(0));
         if (!s) return true;
 
-        boolean isH = false;
-        if (hasOption("h")) {
-            isH = true;
+        if (screens.filter(screen -> (screen.getX() == x && screen.getY() == y && screen.getZ() == z)).size() > 0) {
+            screens.map(screen -> {
+                if (screen.getX() == x && screen.getY() == y && screen.getZ() == z) {
+                    screen.setSize(width, height);
+                    screen.draw(img, satModifier[0]);
+                }
+                return screen;
+            });
         }
-
-        //generate the image within the game
-        //iterate through columns of the image
-        for (float i = 0; i < img.getWidth(); i++) {
-            //iterate through rows within the image
-            for (float j = 0; j < img.getHeight(); j++) {
-                //get the closest material to the color value of the pixel at (i, j) in the image
-                Color col = new Color(img.getRGB((int)i, (int)j));
-                float[] hsb = Color.RGBtoHSB(col.getRed(), col.getGreen(), col.getBlue(), null);
-                hsb[1] = (float) Math.pow(hsb[1], satModifier[0]);
-                Material closest = Colors.closestBlock(Color.getHSBColor(hsb[0], hsb[1], hsb[2]));
-                //set the block corresponding to the image pixel to the closest material, making sure it's within the user-defined width and height
-                new Location(world[0], x + i*width/img.getWidth(), y + (isH ? (height - j*height/img.getHeight()) : 0), z + (isH ? 0 : (height - j*height/img.getHeight()))).getBlock().setType(closest);
-            }
+        else {
+            Screen screen = new Screen(world[0], x, y, z, width, height);
+            screen.draw(img, satModifier[0]);
+            screens.add(screen);
         }
 
         reply(width + "x" + height + " image generated at " + x + ", " + y + ", " + z + " in " + world[0].getName());
@@ -108,7 +103,7 @@ public class ScreenCommand extends SCommand {
         if (args[arg-1].equalsIgnoreCase("--w")) {
             //get list of world names
             return getServer().getWorlds().stream()
-                    .map(f -> f.getName())
+                    .map(WorldInfo::getName)
                     .collect(MList.toMList());
         }
         return new MList<>();

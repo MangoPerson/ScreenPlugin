@@ -5,6 +5,7 @@ import com.github.mangoperson.screenplugin.util.SCommand;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.WorldInfo;
 
 public class MWTeleportCommand extends SCommand {
 
@@ -69,13 +70,11 @@ public class MWTeleportCommand extends SCommand {
 
     @Override
     protected MList<String> tabComplete(int arg) {
-        switch (arg) {
-            case 0:
-                return getServer().getWorlds().stream()
-                        .map(f -> f.getName())
-                        .collect(MList.toMList());
-            default:
-                return new MList<>();
+        if (arg == 0) {
+            return getServer().getWorlds().stream()
+                    .map(WorldInfo::getName)
+                    .collect(MList.toMList());
         }
+        return new MList<>();
     }
 }
