@@ -9,6 +9,9 @@ commands:
   screen:
     description: Update the screen
     usage: "Usage: /screen <width> <height> [--w <world>] [--l <x> <y> <z>]"
+  babel:
+    description: Generate or store a chunk of babel
+    usage: "Usage: /babel <save|load> <filename>"
   mworld:
     description: Use MWorld commands
     usage: Use /mworld help for help

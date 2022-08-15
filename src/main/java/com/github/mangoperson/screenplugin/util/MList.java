@@ -8,6 +8,10 @@ public class MList<E> extends ArrayList<E> {
     public MList() {
         super();
     }
+    @SafeVarargs
+    public MList(E... elements) {
+        new MList<E>(Arrays.stream(elements).toList());
+    }
     public MList(List<E> list) {
         super(list);
     }

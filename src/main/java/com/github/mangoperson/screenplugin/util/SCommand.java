@@ -120,7 +120,7 @@ public abstract class SCommand implements TabExecutor {
         subCommands.add(name, subCommand);
     }
 
-    //retrieve a value from the config file
+    //retrieve a value from the config file.mcb
     protected Object cfg(String key) {
         return ScreenPlugin.getInstance().getConfig().get(key);
     }

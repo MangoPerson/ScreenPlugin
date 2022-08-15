@@ -43,7 +43,7 @@ public class ScreenCommand extends SCommand {
         boolean w = useNSOption("w", "The world you specified does not exist. Using default world instead", str -> getServer().getWorld(str), ops -> world[0] = ops.get(0));
         if (!w) return true;
 
-        //retrieve image name from the config file
+        //retrieve image name from the config file.mcb
         String imgName = (String) cfg("image-name");
 
         //read the image
@@ -55,7 +55,7 @@ public class ScreenCommand extends SCommand {
             throw new RuntimeException(e);
         }
 
-        //retrieve location from the config file
+        //retrieve location from the config file.mcb
         List<Integer> location = (List<Integer>) cfg("screen-location");
 
         boolean l = useNSOption("l", "xyz must be valid coordinates", Integer::valueOf, ops -> {
