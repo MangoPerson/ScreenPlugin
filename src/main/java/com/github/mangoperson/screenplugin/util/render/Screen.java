@@ -33,12 +33,12 @@ public class Screen {
                 float[] hsb = Color.RGBtoHSB(col.getRed(), col.getGreen(), col.getBlue(), null);
                 hsb[1] = (float) Math.pow(hsb[1], saturation);
                 //set the block corresponding to the image pixel to the closest material, making sure it's within the user-defined width and height
-                drawPixel(col, x + i * width/img.getWidth(), y + i * height/ img.getHeight(), saturation);
+                drawPixel(col, x + i * width/img.getWidth(), y - j * height/ img.getHeight());
             }
         }
     }
 
-    public void drawPixel(Color color, float x, float y, double saturation) {
+    public void drawPixel(Color color, float x, float y) {
         drawPixel(Colors.closestBlock(color), x, y);
     }
 

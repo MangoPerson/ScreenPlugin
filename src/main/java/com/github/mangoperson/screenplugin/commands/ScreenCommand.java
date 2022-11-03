@@ -16,8 +16,6 @@ import java.util.List;
 
 public class ScreenCommand extends SCommand {
 
-    private static final MList<Screen> screens = new MList<>();
-
     public ScreenCommand() {
         super("screen");
     }
@@ -78,20 +76,8 @@ public class ScreenCommand extends SCommand {
         boolean s = useNSOption("s", "Saturation level must be a valid number", Double::valueOf, ops -> satModifier[0] = ops.get(0));
         if (!s) return true;
 
-        if (screens.filter(screen -> (screen.getX() == x && screen.getY() == y && screen.getZ() == z)).size() > 0) {
-            screens.map(screen -> {
-                if (screen.getX() == x && screen.getY() == y && screen.getZ() == z) {
-                    screen.setSize(width, height);
-                    screen.draw(img, satModifier[0]);
-                }
-                return screen;
-            });
-        }
-        else {
-            Screen screen = new Screen(world[0], x, y, z, width, height);
-            screen.draw(img, satModifier[0]);
-            screens.add(screen);
-        }
+        Screen screen = new Screen(world[0], x, y, z, width, height);
+        screen.draw(img, satModifier[0]);
 
         reply(width + "x" + height + " image generated at " + x + ", " + y + ", " + z + " in " + world[0].getName());
         return true;

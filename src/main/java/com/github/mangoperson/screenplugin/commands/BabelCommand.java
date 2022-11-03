@@ -2,10 +2,12 @@ package com.github.mangoperson.screenplugin.commands;
 
 import com.github.mangoperson.screenplugin.ScreenPlugin;
 import com.github.mangoperson.screenplugin.util.BabelDecode;
+import com.github.mangoperson.screenplugin.util.MList;
 import com.github.mangoperson.screenplugin.util.SCommand;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.entity.Player;
 
@@ -14,7 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BabelCommand extends SCommand {
@@ -68,41 +69,27 @@ public class BabelCommand extends SCommand {
             @Override
             protected boolean run() {
                 World w;
-                int lx;
-                int ly;
-                int lz;
+                Location l;
 
                 if (sender instanceof Player p) {
-                    Location l = p.getLocation();
-                    lx = (int) l.getX();
-                    ly = (int) l.getY();
-                    lz = (int) l.getZ();
+                    l = p.getLocation();
                     w = l.getWorld();
                 } else if (sender instanceof BlockCommandSender b) {
-                    Location l = b.getBlock().getLocation();
-                    lx = (int) l.getX();
-                    ly = (int) l.getY();
-                    lz = (int) l.getZ();
+                    l = b.getBlock().getLocation();
                     w = l.getWorld();
                 } else {
                     reply("Command must be run by a player or command block");
                     return true;
                 }
 
-                List<Integer> ids = new ArrayList<>();
-
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        for (int y = 0; y < 16; y++) {
-                            int id = ScreenPlugin.getIds().indexOf(new Location(w, x+lx, y+ly, z+lz).getBlock().getType().name());
-                            ids.add(id);
-                        }
-                    }
-                }
-
                 Path p = Paths.get("./plugins/ScreenPlugin/" + args[0]);
                 try {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(p.toFile()));
+
+                    List<Integer> ids = getBlocksIn(w, l, l.add(16, 16, 16))
+                            .map(b -> ScreenPlugin.getIds().indexOf(b.getType().name()));
+
+
                     ids.forEach(i -> {
                         try {
                             writer.append(String.valueOf(i)).append("\n");
@@ -128,5 +115,26 @@ public class BabelCommand extends SCommand {
     @Override
     protected boolean run() {
         return true;
+    }
+
+    public static MList<Block> getBlocksIn(World world, Location p1, Location p2) {
+        MList<Block> blocks = new MList<>();
+        double x1 = p1.getX();
+        double y1 = p1.getY();
+        double z1 = p1.getZ();
+        double x2 = p2.getX();
+        double y2 = p2.getY();
+        double z2 = p2.getZ();
+
+        for (int y = 0; y < y2 - y1; y++) {
+            for (int z = 0; z < z2 - z1; z++) {
+                for (int x = 0; x < x2 - x1; x++) {
+                    Block b = new Location(world, x+x1, y+y1, z+z1).getBlock();
+                    blocks.add(b);
+                }
+            }
+        }
+
+        return blocks;
     }
 }
